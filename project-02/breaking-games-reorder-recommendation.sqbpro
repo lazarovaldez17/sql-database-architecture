@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="breaking_games.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="4299"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><table title="dim_product" custom_title="0" dock_id="1" table="4,11:maindim_product"/><dock_state state="000000ff00000000fd00000001000000020000000000000000fc0100000001fb000000160064006f0063006b00420072006f00770073006500310100000000ffffffff0000011700ffffff000000000000000000000004000000040000000800000008fc00000000"/><default_encoding codec=""/><browse_table_settings/></tab_browse><tab_sql><sql name="SQL 1*">-- Step 1: populate dim_product.category from shopify_sales.product_type
+UPDATE dim_product
+SET category = (
+    SELECT ss.product_type
+    FROM shopify_sales ss
+    WHERE ss.product_id = dim_product.product_id
+)
+WHERE product_id IN (SELECT product_id FROM shopify_sales);
+
+-- Step 2: build the fact table
+DROP TABLE IF EXISTS fact_product_performance;
+CREATE TABLE fact_product_performance AS
+SELECT
+    dp.product_id,
+    dp.product_title,
+    dp.category,
+    COALESCE(
+        (SELECT SUM(r.pageviews)
+         FROM referrals r
+         WHERE r.landing_page LIKE '/products/' || dp.product_slug || '%'),
+    0)                                                        AS pageviews,
+    COALESCE(ss.total_sales, 0)                              AS total_revenue,
+    COALESCE(ss.net_items_sold, 0)                            AS units_sold,
+    ROUND(ss.total_sales / NULLIF(ss.net_items_sold, 0), 2)   AS avg_order_value
+FROM dim_product dp
+LEFT JOIN shopify_sales ss ON ss.product_id = dp.product_id;</sql><sql name="SQL 2*">SELECT * FROM fact_product_performance ORDER BY total_revenue DESC LIMIT 3;</sql><sql name="Print heavy SQL*">SELECT product_title, total_revenue, units_sold, avg_order_value, pageviews
+FROM fact_product_performance
+WHERE total_revenue &gt; 0
+ORDER BY total_revenue DESC
+LIMIT 10;</sql><sql name="Print Light SQL*">SELECT product_title, total_revenue, units_sold, avg_order_value, pageviews
+FROM fact_product_performance
+WHERE total_revenue &gt; 0
+ORDER BY total_revenue DESC
+LIMIT 5 OFFSET 10;</sql><sql name="Don't Print SQL*">SELECT product_title, total_revenue, units_sold, pageviews
+FROM fact_product_performance
+ORDER BY total_revenue ASC
+LIMIT 10;</sql><current_tab id="2"/></tab_sql></sqlb_project>

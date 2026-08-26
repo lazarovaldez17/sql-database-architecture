@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="breaking_games.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="4299"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><table title="dim_product" custom_title="0" dock_id="1" table="4,11:maindim_product"/><dock_state state="000000ff00000000fd00000001000000020000000000000000fc0100000001fb000000160064006f0063006b00420072006f00770073006500310100000000ffffffff0000011700ffffff000000000000000000000004000000040000000800000008fc00000000"/><default_encoding codec=""/><browse_table_settings/></tab_browse><tab_sql><sql name="Analyze top 50 Data SQL*">SELECT 
+    COALESCE(NULLIF(referrer, ''), 'direct') AS referrer,
+    SUM(pageviews) AS pageviews
+FROM referrals
+GROUP BY referrer
+ORDER BY pageviews DESC
+LIMIT 50;</sql><sql name="Build lookup table *">DROP TABLE IF EXISTS dim_referrer;
+
+CREATE TABLE dim_referrer (
+    referrer TEXT PRIMARY KEY,
+    channel TEXT,
+    channel_type TEXT
+);
+
+INSERT INTO dim_referrer (referrer)
+SELECT DISTINCT COALESCE(NULLIF(referrer, ''), 'direct') FROM referrals;
+
+-- Paid Social: Meta-owned properties — the only channel with matched spend
+-- data in meta_campaigns / meta_ad_sets
+UPDATE dim_referrer SET channel = 'Paid Social', channel_type = 'Paid'
+WHERE referrer IN ('facebook', 'instagram', 'meta');
+
+-- Organic Search: unpaid search engines, plus AI answer engines acting as
+-- search (chatgpt, perplexity)
+UPDATE dim_referrer SET channel = 'Organic Search', channel_type = 'Organic'
+WHERE referrer IN (
+    'google', 'bing', 'duckduckgo', 'yahoo!', 'brave', 'ecosia', 'yandex',
+    'baidu', 'qwant', 'naver', 'mojeek', 'chatgpt', 'perplexity'
+);
+
+-- Paid Search: non-Meta paid ad networks/placements
+UPDATE dim_referrer SET channel = 'Paid Search', channel_type = 'Paid'
+WHERE referrer IN ('googlesyndication', 'syndicatedsearch');
+
+-- Organic Social: unpaid social/video platforms with no ad spend on record
+UPDATE dim_referrer SET channel = 'Organic Social', channel_type = 'Organic'
+WHERE referrer IN ('tiktok', 'pinterest', 'reddit', 'linkedin', 'nextdoor', 'youtube');
+
+-- Owned: direct visits, Breaking Games' own email tool (klaviyo), and
+-- webmail providers (email link clicks logged as the mail client's domain)
+UPDATE dim_referrer SET channel = 'Owned', channel_type = 'Owned'
+WHERE referrer IN (
+    'direct', 'klaviyo', 'gmail', 'live', 'office', 'deref-gmx',
+    'yahoo! mail', 'outlook.com', 'inbox', 'mailchi'
+);
+
+-- Catch-all (always last) — includes the eleven former &quot;Community&quot; referrers
+-- (boardgamegeek, boardgamearena, admagic, mapyourshow, gencon, paxsite,
+-- spieletastisch, printplaygames, mensamindgames, boardlife, kickstarter),
+-- the long tail of ~400 one-off referrers, and 'robots'
+UPDATE dim_referrer SET channel = 'Other', channel_type = 'Other'
+WHERE channel IS NULL;</sql><sql name="Sanity Check*">SELECT dr.channel, dr.channel_type, SUM(r.pageviews) AS pageviews
+FROM referrals r
+JOIN dim_referrer dr
+  ON dr.referrer = COALESCE(NULLIF(r.referrer, ''), 'direct')
+GROUP BY dr.channel, dr.channel_type
+ORDER BY pageviews DESC;
+</sql><sql name="Facebook Spend*">WITH fb_spend AS (
+    SELECT ROUND(SUM(spend_usd), 2) AS total_spend
+    FROM meta_campaigns
+    WHERE delivery_status IN ('active', 'inactive')  -- ran at some point
+),
+fb_traffic AS (
+    SELECT 
+        SUM(r.pageviews) AS pageviews,
+        SUM(r.checkout_sessions) AS checkouts
+    FROM referrals r
+    JOIN dim_referrer dr ON COALESCE(NULLIF(r.referrer, ''), 'direct') = dr.referrer
+    WHERE dr.channel = 'Paid Social'
+)
+SELECT 
+    fs.total_spend,
+    ft.pageviews,
+    ft.checkouts,
+    ROUND(fs.total_spend / NULLIF(ft.pageviews, 0), 4) AS cost_per_pageview,
+    ROUND(fs.total_spend / NULLIF(ft.checkouts, 0), 2) AS cost_per_checkout_session
+FROM fb_spend fs, fb_traffic ft;</sql><sql name="Products, Facebook Traffic *">SELECT 
+    dp.product_title,
+    COALESCE(SUM(CASE WHEN dr.channel = 'Paid Social' THEN r.pageviews END), 0) AS fb_pageviews,
+    COALESCE(ss.net_items_sold, 0) AS units_sold,
+    COALESCE(ROUND(ss.total_sales, 2), 0) AS revenue
+FROM dim_product dp
+LEFT JOIN referrals r ON r.landing_page LIKE '%' || dp.product_slug || '%'
+LEFT JOIN dim_referrer dr ON COALESCE(NULLIF(r.referrer, ''), 'direct') = dr.referrer
+LEFT JOIN shopify_sales ss ON ss.product_id = dp.product_id
+GROUP BY dp.product_id, dp.product_title, ss.net_items_sold, ss.total_sales
+HAVING fb_pageviews &gt; 100
+ORDER BY fb_pageviews DESC
+LIMIT 15;</sql><current_tab id="0"/></tab_sql></sqlb_project>

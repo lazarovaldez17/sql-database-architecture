@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="breaking_games.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="4299"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><table title="dim_product" custom_title="0" dock_id="1" table="4,11:maindim_product"/><dock_state state="000000ff00000000fd00000001000000020000000000000000fc0100000001fb000000160064006f0063006b00420072006f00770073006500310100000000ffffffff0000011700ffffff000000000000000000000004000000040000000800000008fc00000000"/><default_encoding codec=""/><browse_table_settings/></tab_browse><tab_sql><sql name="CTR, CPC *">SELECT 
+    campaign_name,
+    spend_usd,
+    impressions,
+    link_clicks,
+    ROUND(ctr_link, 3) AS ctr_pct,
+    ROUND(cpc_usd, 2) AS cpc_usd
+FROM meta_campaigns
+WHERE link_clicks &gt; 0
+ORDER BY ctr_link DESC
+LIMIT 10;</sql><sql name="Most Efficient Campaign (lowest cost per result)*">SELECT 
+    campaign_name,
+    delivery_status,
+    spend_usd,
+    results,
+    ROUND(cost_per_result, 2) AS cost_per_result_usd
+FROM meta_campaigns
+WHERE results IS NOT NULL AND results &gt; 0
+  AND delivery_status IN ('active', 'inactive')
+ORDER BY cost_per_result ASC
+LIMIT 10;</sql><sql name="Highest CTR (most engaging campaign) *">SELECT 
+    campaign_name,
+    impressions,
+    link_clicks,
+    ROUND(ctr_link, 3) AS ctr_pct,
+    spend_usd
+FROM meta_campaigns
+WHERE impressions &gt; 1000   -- exclude noise from low-volume campaigns
+  AND ctr_link IS NOT NULL
+ORDER BY ctr_link DESC
+LIMIT 10;</sql><sql name="Highest Volume (most results campaign)*">SELECT 
+    campaign_name,
+    spend_usd,
+    results,
+    result_indicator,
+    ROUND(cost_per_result, 2) AS cost_per_result_usd
+FROM meta_campaigns
+WHERE results IS NOT NULL AND results &gt; 0
+ORDER BY results DESC
+LIMIT 10;</sql><sql name="Campaigns to cut*">SELECT 
+    campaign_name,
+    delivery_status,
+    spend_usd,
+    impressions,
+    link_clicks,
+    results,
+    ROUND(cost_per_result, 2) AS cost_per_result_usd
+FROM meta_campaigns
+WHERE spend_usd &gt; 100   -- ignore campaigns that barely ran
+  AND (
+       (results IS NULL OR results = 0)            -- no conversions
+    OR (cost_per_result &gt; 100)                     -- absurdly expensive
+    OR (ctr_link &lt; 0.1 AND impressions &gt; 10000)    -- weak CTR at scale
+  )
+ORDER BY spend_usd DESC;</sql><current_tab id="4"/></tab_sql></sqlb_project>

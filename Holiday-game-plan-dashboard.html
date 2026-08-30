@@ -1,0 +1,1586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Breaking Games &mdash; Holiday Game Plan Dashboard</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<style>
+:root {
+  --primary: #B8552B;
+  --primary-dark: #8B3F1F;
+  --primary-light: #DA7A4F;
+  --forest: #1F3A2B;
+  --forest-light: #2E5640;
+  --gold: #C9A24E;
+  --gold-light: #E0BE76;
+  --slate: #5A7A8A;
+  --mauve: #9A5A7A;
+
+  --bg: #F8F2E5;
+  --bg-warm: #F0E9D8;
+  --bg-cool: #ECE4D2;
+  --card: #FFFFFF;
+  --card-warm: #FDF9F0;
+  --ink: #1A1410;
+  --ink-soft: #3A322A;
+  --muted: #756B5E;
+  --hairline: #E8DFC9;
+
+  --success: #4A7A4A;
+  --warning: #C97B2A;
+  --danger: #A04030;
+
+  --shadow-sm: 0 1px 3px rgba(26, 20, 16, 0.04), 0 1px 2px rgba(26, 20, 16, 0.06);
+  --shadow-md: 0 4px 12px rgba(26, 20, 16, 0.05), 0 2px 4px rgba(26, 20, 16, 0.05);
+  --shadow-lg: 0 12px 32px rgba(26, 20, 16, 0.08), 0 4px 8px rgba(26, 20, 16, 0.04);
+
+  --r-sm: 6px;
+  --r-md: 12px;
+  --r-lg: 18px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.55;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.serif { font-family: 'Fraunces', Georgia, serif; font-feature-settings: "ss01"; }
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+/* ============================================================
+   STICKY NAV
+   ============================================================ */
+nav.topnav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(248, 242, 229, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--hairline);
+}
+nav.topnav .inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0.85rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+nav.topnav .brand {
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+nav.topnav .brand .dot {
+  display: inline-block;
+  width: 0.6rem;
+  height: 0.6rem;
+  background: var(--primary);
+  border-radius: 50%;
+}
+nav.topnav .links {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.85rem;
+}
+nav.topnav .links a {
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  transition: color 0.15s;
+}
+nav.topnav .links a:hover { color: var(--primary); }
+nav.topnav .meta {
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ============================================================
+   LAYOUT WRAPPERS
+   ============================================================ */
+.wrap {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+section {
+  padding: 4rem 0;
+  border-top: 1px solid transparent;
+}
+section.tinted { background: var(--bg-warm); border-top-color: var(--hairline); }
+section.deep { background: var(--bg-cool); border-top-color: var(--hairline); }
+section.dark { background: var(--ink); color: #F0E9D8; }
+section.dark .section-eyebrow { color: var(--gold-light); }
+section.dark .section-title { color: #FFFFFF; }
+section.dark .section-caption { color: #C4B9A8; }
+
+.section-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--primary);
+  margin-bottom: 0.85rem;
+}
+.section-title {
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  font-size: 2.5rem;
+  line-height: 1.1;
+  color: var(--ink);
+  margin-bottom: 1.25rem;
+  letter-spacing: -0.02em;
+}
+.section-caption {
+  font-size: 1.05rem;
+  color: var(--ink-soft);
+  max-width: 720px;
+  line-height: 1.6;
+}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero {
+  padding: 6rem 0 5rem;
+  background:
+    radial-gradient(ellipse at 80% 20%, rgba(184, 85, 43, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 10% 70%, rgba(201, 162, 78, 0.06) 0%, transparent 60%),
+    var(--bg);
+}
+.hero .eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--primary);
+  margin-bottom: 1.25rem;
+}
+.hero h1 {
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  font-size: 4rem;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  margin-bottom: 1.5rem;
+}
+.hero h1 em {
+  font-style: italic;
+  font-weight: 500;
+  color: var(--primary);
+}
+.hero .deck {
+  font-size: 1.25rem;
+  color: var(--ink-soft);
+  max-width: 760px;
+  line-height: 1.55;
+  margin-bottom: 3.5rem;
+}
+
+.tldr {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 1rem;
+}
+.tldr-card {
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+  padding: 1.75rem;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.tldr-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+.tldr-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: var(--primary);
+}
+.tldr-card:nth-child(2)::before { background: var(--forest-light); }
+.tldr-card:nth-child(3)::before { background: var(--gold); }
+
+.tldr-card .num {
+  font-family: 'Fraunces', serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+}
+.tldr-card .title {
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  font-size: 1.35rem;
+  line-height: 1.2;
+  color: var(--ink);
+  margin-bottom: 0.85rem;
+  letter-spacing: -0.01em;
+}
+.tldr-card .body {
+  font-size: 0.92rem;
+  color: var(--ink-soft);
+  line-height: 1.55;
+}
+.tldr-card .body strong { color: var(--primary); font-weight: 600; }
+.tldr-card:nth-child(2) .body strong { color: var(--forest); }
+.tldr-card:nth-child(3) .body strong { color: var(--primary-dark); }
+
+.hero-meta {
+  margin-top: 2.5rem;
+  display: flex;
+  gap: 2.5rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+.hero-meta .item .label {
+  display: block;
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  margin-bottom: 0.25rem;
+}
+.hero-meta .item .val { color: var(--ink); font-size: 0.9rem; }
+
+/* ============================================================
+   KPI CARDS
+   ============================================================ */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+  margin-top: 2.5rem;
+}
+.kpi {
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  padding: 1.4rem 1.6rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 150px;
+  transition: transform 0.2s, border-color 0.2s;
+}
+.kpi:hover { transform: translateY(-2px); border-color: var(--primary-light); }
+.kpi .value {
+  font-family: 'Fraunces', serif;
+  font-size: 2.4rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--primary);
+}
+.kpi .label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-top: 0.6rem;
+}
+.kpi .ctx {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  margin-top: 0.85rem;
+  line-height: 1.4;
+}
+
+/* ============================================================
+   SPOTLIGHT
+   ============================================================ */
+.spotlight {
+  background: linear-gradient(135deg, var(--ink) 0%, #2A1F18 100%);
+  color: #F8F2E5;
+  border-radius: var(--r-lg);
+  padding: 2.5rem 2.75rem;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2rem;
+  align-items: center;
+  margin-top: 2.5rem;
+  position: relative;
+  overflow: hidden;
+}
+.spotlight::after {
+  content: '';
+  position: absolute;
+  right: -50px;
+  top: -50px;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(201, 162, 78, 0.18) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.spotlight .number {
+  font-family: 'Fraunces', serif;
+  font-weight: 800;
+  font-size: 4rem;
+  line-height: 0.95;
+  color: var(--gold-light);
+  letter-spacing: -0.02em;
+  position: relative;
+  z-index: 1;
+  white-space: nowrap;
+}
+.spotlight .copy {
+  position: relative;
+  z-index: 1;
+}
+.spotlight .copy .label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 0.6rem;
+}
+.spotlight .copy .text {
+  font-size: 1rem;
+  color: #E8DFC9;
+  line-height: 1.6;
+  max-width: 760px;
+}
+.spotlight .copy .text strong {
+  color: var(--gold-light);
+  font-weight: 600;
+}
+
+/* ============================================================
+   SECTION HEADER
+   ============================================================ */
+.section-head {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 3rem;
+  align-items: start;
+  margin-bottom: 3rem;
+}
+.section-head .index {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  padding-top: 0.85rem;
+  border-top: 2px solid var(--primary);
+  font-weight: 600;
+}
+.section-head .index .roman {
+  display: block;
+  font-family: 'Fraunces', serif;
+  font-size: 2rem;
+  color: var(--primary);
+  margin-top: 0.4rem;
+  font-style: italic;
+  font-weight: 400;
+}
+@media (max-width: 800px) {
+  .section-head { grid-template-columns: 1fr; gap: 1rem; }
+}
+
+/* ============================================================
+   CHART CARDS
+   ============================================================ */
+.chart-card {
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  padding: 1.75rem 2rem 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+.chart-card.warm { background: var(--card-warm); }
+.chart-card .chart-title {
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--ink);
+  margin-bottom: 0.3rem;
+  letter-spacing: -0.01em;
+}
+.chart-card .chart-sub {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 1.25rem;
+}
+.chart-wrapper {
+  position: relative;
+  height: 280px;
+  width: 100%;
+}
+.chart-wrapper.tall { height: 380px; }
+.chart-wrapper canvas { max-height: 100% !important; max-width: 100% !important; }
+
+.chart-meaning {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--hairline);
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+}
+.chart-meaning::before {
+  content: '→';
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 1.1rem;
+  line-height: 1.3;
+  flex-shrink: 0;
+}
+.chart-meaning strong { color: var(--ink); font-weight: 600; }
+
+/* ============================================================
+   LEADERBOARD TABLE
+   ============================================================ */
+.leaderboard {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+.leaderboard th {
+  text-align: left;
+  padding: 0.85rem 1rem;
+  background: var(--bg-warm);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-weight: 700;
+}
+.leaderboard th.num { text-align: right; }
+.leaderboard td {
+  padding: 0.85rem 1rem;
+  border-top: 1px solid var(--hairline);
+}
+.leaderboard td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.leaderboard tr:hover td { background: var(--card-warm); }
+.leaderboard tr.top td { font-weight: 600; }
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  background: var(--bg-warm);
+  border-radius: 50%;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.rank-badge.gold { background: var(--primary); color: white; }
+.rank-badge.silver { background: var(--gold); color: white; }
+.rank-badge.bronze { background: var(--gold-light); color: white; }
+
+/* ============================================================
+   PULL QUOTES
+   ============================================================ */
+.pullquote {
+  margin: 4rem 0 0;
+  padding: 0 2rem;
+  text-align: center;
+}
+.pullquote .mark {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 4.5rem;
+  line-height: 0.6;
+  color: var(--primary);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+.pullquote q {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 1.85rem;
+  line-height: 1.35;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  display: block;
+  max-width: 880px;
+  margin: 0 auto;
+  quotes: none;
+}
+.pullquote q::before, .pullquote q::after { content: none; }
+.pullquote .attr {
+  display: block;
+  margin-top: 1.5rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+}
+
+/* ============================================================
+   KEY FINDINGS
+   ============================================================ */
+.findings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+}
+@media (max-width: 800px) { .findings-grid { grid-template-columns: 1fr; } }
+.finding {
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  padding: 1.5rem 1.75rem;
+  border-left: 4px solid var(--primary);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.finding:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.finding:nth-child(2) { border-left-color: var(--forest-light); }
+.finding:nth-child(3) { border-left-color: var(--gold); }
+.finding:nth-child(4) { border-left-color: var(--slate); }
+.finding:nth-child(5) { border-left-color: var(--mauve); }
+.finding .head {
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--ink);
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.01em;
+}
+.finding .body {
+  font-size: 0.93rem;
+  color: var(--ink-soft);
+  line-height: 1.55;
+}
+
+/* ============================================================
+   GAME PLAN CARDS
+   ============================================================ */
+.gameplan {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+.gp-card {
+  background: var(--card);
+  border-radius: var(--r-lg);
+  padding: 2rem 2rem 1.75rem;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  border-top: 5px solid var(--primary);
+}
+.gp-card:nth-child(2) { border-top-color: var(--forest); }
+.gp-card:nth-child(3) { border-top-color: var(--gold); }
+
+.gp-card .step {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-bottom: 0.85rem;
+}
+.gp-card:nth-child(2) .step { color: var(--forest); }
+.gp-card:nth-child(3) .step { color: var(--primary-dark); }
+
+.gp-card .title {
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  font-size: 1.5rem;
+  line-height: 1.15;
+  color: var(--ink);
+  margin-bottom: 1.25rem;
+  letter-spacing: -0.015em;
+}
+.gp-card .meta {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+}
+.gp-card .meta .k {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-top: 0.15rem;
+}
+.gp-card .meta .v {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+.gp-card .meta .v strong { color: var(--ink); font-weight: 600; }
+
+/* ============================================================
+   Q4 ROADMAP TIMELINE
+   ============================================================ */
+.roadmap {
+  position: relative;
+  padding: 1rem 0;
+}
+.roadmap-track {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0;
+}
+.roadmap-track::before {
+  content: '';
+  position: absolute;
+  top: 24px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--hairline);
+  z-index: 0;
+}
+.roadmap-step {
+  position: relative;
+  padding: 0 0.85rem;
+  z-index: 1;
+}
+.roadmap-step .dot {
+  display: block;
+  width: 50px;
+  height: 50px;
+  margin: 0 auto 1rem;
+  background: var(--card);
+  border: 2px solid var(--primary);
+  border-radius: 50%;
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--primary);
+  line-height: 46px;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+.roadmap-step .month {
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-bottom: 0.6rem;
+}
+.roadmap-step .title {
+  text-align: center;
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--ink);
+  margin-bottom: 0.6rem;
+  line-height: 1.25;
+}
+.roadmap-step .body {
+  font-size: 0.83rem;
+  color: var(--ink-soft);
+  text-align: center;
+  line-height: 1.45;
+}
+@media (max-width: 900px) {
+  .roadmap-track { grid-template-columns: 1fr; gap: 1.5rem; }
+  .roadmap-track::before { left: 24px; right: auto; top: 0; bottom: 0; height: auto; width: 2px; }
+  .roadmap-step { display: grid; grid-template-columns: 50px 1fr; gap: 1rem; padding: 0; }
+  .roadmap-step .dot { margin: 0; }
+  .roadmap-step .month, .roadmap-step .title, .roadmap-step .body { text-align: left; }
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+footer {
+  padding: 3rem 0 4rem;
+  border-top: 1px solid var(--hairline);
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+footer .row {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 0.75rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+}
+footer code {
+  font-family: 'JetBrains Mono', monospace;
+  background: var(--bg-warm);
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  font-size: 0.85em;
+  color: var(--ink);
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ============================================================
+   PRINT
+   ============================================================ */
+@media print {
+  nav.topnav { display: none; }
+  body { background: white; font-size: 11pt; }
+  section { padding: 1.5rem 0; }
+  .chart-card, .finding, .gp-card, .tldr-card { box-shadow: none; break-inside: avoid; }
+  .reveal { opacity: 1; transform: none; }
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 1100px) {
+  .kpi-grid { grid-template-columns: repeat(3, 1fr); }
+  .tldr { grid-template-columns: 1fr; }
+  .gameplan { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 2.75rem; }
+  .section-title { font-size: 1.85rem; }
+}
+@media (max-width: 700px) {
+  .wrap { padding: 0 1rem; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .findings-grid { grid-template-columns: 1fr; }
+  .spotlight { grid-template-columns: 1fr; padding: 1.75rem; }
+  .spotlight .number { font-size: 2.75rem; }
+  nav.topnav .links { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     STICKY NAV
+     ============================================================ -->
+<nav class="topnav">
+  <div class="inner">
+    <div class="brand"><span class="dot"></span> Breaking Games &middot; Holiday Game Plan</div>
+    <div class="links">
+      <a href="#tldr">TL;DR</a>
+      <a href="#kpis">The Five Numbers</a>
+      <a href="#diagnosis">Diagnosis</a>
+      <a href="#findings">Findings</a>
+      <a href="#gameplan">Game Plan</a>
+      <a href="#roadmap">Roadmap</a>
+    </div>
+    <div class="meta">Jan&ndash;Jul 2025</div>
+  </div>
+</nav>
+
+<!-- ============================================================
+     HERO + TL;DR
+     ============================================================ -->
+<section class="hero" id="tldr">
+  <div class="wrap">
+    <div class="eyebrow">Externship deliverable &middot; Built 08-30-2026</div>
+    <h1 class="serif">Mike asked one question.<br/><em>The data answered three.</em></h1>
+    <p class="deck">
+      Seven months of Breaking Games data, distilled into a Q4 Game Plan. Three recommendations the team should act on before November 1 &mdash; backed by every number on this page and the SQL that produced them.
+    </p>
+
+    <div class="tldr">
+      <div class="tldr-card">
+        <div class="num">Recommendation 01</div>
+        <div class="title serif">Print the proven thirteen SKUs.</div>
+        <div class="body">
+          80.2% of seven-month revenue ran through 13 products. The catalog's long tail is a hedge, not a profit driver. <strong>Print heavy on Dwellings of Eldervale</strong> (65.2% of revenue from one 10-SKU franchise) plus the next proven non-Dwellings titles.
+        </div>
+      </div>
+      <div class="tldr-card">
+        <div class="num">Recommendation 02</div>
+        <div class="title serif">Rebalance ~$20K of Meta spend.</div>
+        <div class="body">
+          "DA | Sales" spent <strong>$12,917 with zero recorded results</strong> &mdash; 34.7% of the Meta budget. Organic Search converts <strong>3.8&times;</strong> better than Paid Social on comparable pageview volume. Redirect Q4 dollars toward what's measurable.
+        </div>
+      </div>
+      <div class="tldr-card">
+        <div class="num">Recommendation 03</div>
+        <div class="title serif">Build the retention engine.</div>
+        <div class="body">
+          Only <strong>12 of 1,021 unique customers</strong> came back for a second cart. The biggest untapped lever isn't the cart-abandonment number &mdash; that turns out to be a normal 50.8% &mdash; it's the retention loop that doesn't exist yet.
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-meta">
+      <div class="item">
+        <span class="label">Data window</span>
+        <span class="val">Jan 1 &ndash; Jul 29, 2025</span>
+      </div>
+      <div class="item">
+        <span class="label">SKUs analyzed</span>
+        <span class="val">117 catalog &middot; 99 with sales</span>
+      </div>
+      <div class="item">
+        <span class="label">Source DB</span>
+        <span class="val mono">breaking_games.db</span>
+      </div>
+      <div class="item">
+        <span class="label">Reproducible</span>
+        <span class="val">Every KPI reads from <span class="mono">dashboard_metrics</span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     THE FIVE NUMBERS
+     ============================================================ -->
+<section class="tinted" id="kpis">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="index">
+        Part I
+        <span class="roman">The numbers</span>
+      </div>
+      <div>
+        <div class="section-eyebrow">Top-line KPIs</div>
+        <h2 class="section-title serif">The five numbers Mike asks for every Monday.</h2>
+        <p class="section-caption">A baseline read of the seven-month commerce window. Everything downstream builds on these five. Source: <span class="mono">SELECT * FROM dashboard_metrics;</span></p>
+      </div>
+    </div>
+
+    <div class="kpi-grid reveal">
+      <div class="kpi">
+        <div class="value" data-target="61085" data-prefix="$">$0</div>
+        <div class="label">Total Revenue</div>
+        <div class="ctx">Jan&ndash;Jul, 99 SKUs sold</div>
+      </div>
+      <div class="kpi">
+        <div class="value" data-target="1972">0</div>
+        <div class="label">Units Sold</div>
+        <div class="ctx">Across 99 of 117 catalog SKUs</div>
+      </div>
+      <div class="kpi">
+        <div class="value" data-target="37201" data-prefix="$">$0</div>
+        <div class="label">Meta Ad Spend</div>
+        <div class="ctx">61% of revenue went to paid acquisition</div>
+      </div>
+      <div class="kpi">
+        <div class="value" data-target="1062">0</div>
+        <div class="label">Carts Started</div>
+        <div class="ctx">Raw count, window mixes 2016&ndash;2025 unevenly</div>
+      </div>
+      <div class="kpi">
+        <div class="value" data-target="93">0</div>
+        <div class="label">Orders Completed</div>
+        <div class="ctx">July only &mdash; the comparable window</div>
+      </div>
+    </div>
+
+    <!-- SPOTLIGHT -->
+    <div class="spotlight reveal">
+      <div class="number serif">12 of 1,021</div>
+      <div class="copy">
+        <div class="label">Returning customers &mdash; the biggest untapped lever</div>
+        <div class="text">
+          Only 12 unique customers came back for a second cart this period &mdash; a <strong>1.2% repeat rate</strong> on a customer base where building a retention loop is close to free.
+          And the cart-abandonment number everyone's worried about isn't actually a crisis: the raw, mismatched-window math says 91.9%, but once bot carts are filtered and the comparison window is aligned to July, the real rate is a normal <strong>50.8%</strong>.
+          The Q4 fix isn't a checkout rebuild &mdash; it's the retention engine that doesn't exist yet.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     PRODUCT DIAGNOSIS
+     ============================================================ -->
+<section id="diagnosis">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="index">
+        Part II
+        <span class="roman">Where the money is</span>
+      </div>
+      <div>
+        <div class="section-eyebrow">Product analysis</div>
+        <h2 class="section-title serif">Eight of the top twelve revenue lines are Dwellings titles.</h2>
+        <p class="section-caption">Revenue concentration is the cleanest signal in the data. Two-thirds of the business runs through one franchise; the long tail is a hedge, not a driver.</p>
+      </div>
+    </div>
+
+    <div class="chart-card reveal">
+      <div class="chart-title serif">Top 10 Products by Revenue</div>
+      <div class="chart-sub">Top 5 deliver 61.0% of revenue. Top 13 deliver 80.2%.</div>
+      <table class="leaderboard">
+        <thead>
+          <tr>
+            <th style="width:4rem">Rank</th>
+            <th>Product</th>
+            <th class="num">Revenue</th>
+            <th class="num">Units</th>
+            <th class="num">AOV</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="top"><td><span class="rank-badge gold">1</span></td><td>Dwellings of Eldervale 2nd Edition: Standard</td><td class="num">$13,323.56</td><td class="num">129</td><td class="num">$103.28</td></tr>
+          <tr class="top"><td><span class="rank-badge silver">2</span></td><td>Dwellings of Eldervale &mdash; LEGENDARY Upgrade Kit</td><td class="num">$12,514.05</td><td class="num">175</td><td class="num">$71.51</td></tr>
+          <tr class="top"><td><span class="rank-badge bronze">3</span></td><td>Dwellings of Eldervale &mdash; DELUXE Upgrade Kit</td><td class="num">$5,014.81</td><td class="num">89</td><td class="num">$56.35</td></tr>
+          <tr><td><span class="rank-badge">4</span></td><td>We&rsquo;re Doomed!</td><td class="num">$3,810.47</td><td class="num">104</td><td class="num">$36.64</td></tr>
+          <tr><td><span class="rank-badge">5</span></td><td>Dwellings &mdash; Wooden Upgrade Treasure &amp; Trove</td><td class="num">$2,586.22</td><td class="num">127</td><td class="num">$20.36</td></tr>
+          <tr><td><span class="rank-badge">6</span></td><td>The Big Box of Magic</td><td class="num">$1,920.14</td><td class="num">46</td><td class="num">$41.74</td></tr>
+          <tr><td><span class="rank-badge">7</span></td><td>Dwellings &mdash; Exclusive Game Mat</td><td class="num">$1,874.13</td><td class="num">28</td><td class="num">$66.93</td></tr>
+          <tr><td><span class="rank-badge">8</span></td><td>MIXTAPE</td><td class="num">$1,733.39</td><td class="num">83</td><td class="num">$20.88</td></tr>
+          <tr><td><span class="rank-badge">9</span></td><td>Dwellings &mdash; Minotaur Mercenary Mini</td><td class="num">$1,370.38</td><td class="num">135</td><td class="num">$10.15</td></tr>
+          <tr><td><span class="rank-badge">10</span></td><td>Dwellings &mdash; Shapeshifter Mercenary Mini</td><td class="num">$1,361.17</td><td class="num">134</td><td class="num">$10.16</td></tr>
+        </tbody>
+      </table>
+      <div class="chart-meaning">
+        <div><strong>What this means.</strong> Reorder commitment should weight the top 13 SKUs heavily &mdash; 8 of which are Dwellings. Print heavy on the Dwellings core line and the proven non-Dwellings sellers (We're Doomed!, Big Box of Magic, MIXTAPE); defer the long tail until page-conversion data says otherwise.</div>
+      </div>
+    </div>
+
+    <div class="chart-card reveal" style="margin-top: 1.5rem;">
+      <div class="chart-title serif">Revenue Concentration by Franchise</div>
+      <div class="chart-sub">Dwellings of Eldervale alone produces 65.2% of revenue across 10 SKUs.</div>
+      <div class="chart-wrapper"><canvas id="revenueDistChart"></canvas></div>
+      <div class="chart-meaning">
+        <div><strong>What this means.</strong> Concentration this dense is both an asset (a working franchise with an upsell ladder) and a single point of failure (one Dwellings supply-chain hiccup would dent two-thirds of the business). The Q4 print run should reflect both &mdash; heavy commit, with the proven non-Dwellings titles as insurance.</div>
+      </div>
+    </div>
+
+    <div class="pullquote">
+      <span class="mark">&ldquo;</span>
+      <q class="serif">Thirteen products produced four-fifths of the revenue. That&rsquo;s the print-run reality.</q>
+      <span class="attr">From the Holiday Game Plan, product analysis</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     CHANNEL DIAGNOSIS
+     ============================================================ -->
+<section class="tinted">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="index">
+        Part III
+        <span class="roman">Where the money goes</span>
+      </div>
+      <div>
+        <div class="section-eyebrow">Channel analysis</div>
+        <h2 class="section-title serif">Paid Social converts at 0.124%. Organic Search converts at 0.476%.</h2>
+        <p class="section-caption">On comparable pageview volume (90,978 vs. 80,596), Organic Search converts 3.8&times; better than Paid Social. Per Project 3, this is correlation from the six-channel taxonomy built off <span class="mono">dim_referrer</span> &mdash; there's no session-to-purchase link in this data, so treat it as a reallocation signal, not proof of causation.</p>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+      <div class="chart-card reveal">
+        <div class="chart-title serif">Channel Conversion Rate</div>
+        <div class="chart-sub">Checkout sessions &divide; pageviews, by the Project 3 six-channel taxonomy</div>
+        <div class="chart-wrapper"><canvas id="cvrChart"></canvas></div>
+        <div class="chart-meaning">
+          <div><strong>What this means.</strong> A 3.8&times; CVR gap between Organic Search and Paid Social on similar traffic volume is too wide to write off as noise, even without formal attribution.</div>
+        </div>
+      </div>
+      <div class="chart-card reveal">
+        <div class="chart-title serif">Cart Browsing by Hour of Day</div>
+        <div class="chart-sub">Lunch hour is peak; steady overnight volume hints at international traffic</div>
+        <div class="chart-wrapper"><canvas id="hourChart"></canvas></div>
+        <div class="chart-meaning">
+          <div><strong>What this means.</strong> Recovery emails timed to early afternoon may catch peak-intent abandons. Overnight US-hours volume is heavier than a US-only customer base would explain.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-card reveal">
+      <div class="chart-title serif">Top 10 US States by Cart Volume</div>
+      <div class="chart-sub">Washington leads &mdash; surprising vs. the expected CA/NY/TX concentration.</div>
+      <div class="chart-wrapper"><canvas id="geoChart"></canvas></div>
+      <div class="chart-meaning">
+        <div><strong>What this means.</strong> About 51% of carts are US; the rest is meaningfully international (Canada, Germany, UK, and Mexico each with 16+ carts). Shipping cost is a known abandonment driver internationally &mdash; worth checking whether that explains part of the checkout drop-off abroad.</div>
+      </div>
+    </div>
+
+    <div class="pullquote">
+      <span class="mark">&ldquo;</span>
+      <q class="serif">Nobody can currently connect ad spend to actual revenue &mdash; the two live in completely disconnected systems.</q>
+      <span class="attr">The business problem, restated</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     AD SPEND DEEP DIVE
+     ============================================================ -->
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <div class="index">
+        Part IV
+        <span class="roman">The dead spend</span>
+      </div>
+      <div>
+        <div class="section-eyebrow">Meta campaign ROI</div>
+        <h2 class="section-title serif">Cost-per-result varies 14&times; across campaigns.</h2>
+        <p class="section-caption">The Meta spend isn't broken &mdash; but the cost-per-result spread between campaigns is wide enough to warrant an attribution audit before Q4 budget locks. The standout: "DA | Sales | ATC" delivered results at $4.96 each. The Advantage Plus campaign delivered them at $70.76.</p>
+      </div>
+    </div>
+
+    <div class="chart-card warm reveal">
+      <div class="chart-title serif">Meta Spend vs Tracked Results &mdash; Top 7 Campaigns by Spend</div>
+      <div class="chart-sub">Orange = spend ($). Green = sales-objective results (where reported).</div>
+      <div class="chart-wrapper tall"><canvas id="adSpendChart"></canvas></div>
+      <div class="chart-meaning">
+        <div><strong>What this means.</strong> "DA | Sales" is the single largest campaign by spend ($12,917, 34.7% of the Meta budget) with zero recorded results &mdash; it isn't tagged with a sales objective at all. "DA | Sales | ATC" produced 291 results at $4.96 each, the cheapest meaningful spend by far. Advantage Plus delivered at 14&times; that cost. Pausing or auditing the untracked spend and shifting it toward the proven campaign is the actionable move before Q4 locks.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     KEY FINDINGS
+     ============================================================ -->
+<section class="tinted" id="findings">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="index">
+        Part V
+        <span class="roman">What we found</span>
+      </div>
+      <div>
+        <div class="section-eyebrow">Five key findings</div>
+        <h2 class="section-title serif">The five things the team needs to know first.</h2>
+        <p class="section-caption">Each finding is reproducible against <span class="mono">breaking_games.db</span> &mdash; see <span class="mono">dashboard_metrics</span>, <span class="mono">dashboard_leaderboard</span>, and <span class="mono">dashboard_channels</span>.</p>
+      </div>
+    </div>
+
+    <div class="findings-grid">
+      <div class="finding reveal">
+        <div class="head serif">01 &middot; Concentration</div>
+        <div class="body">Two-thirds of revenue came from a single franchise &mdash; Dwellings of Eldervale at $39,813.67 (65.2%) across 10 SKUs; the base game plus its two upgrade kits alone are 50.5%. The Q4 reorder is a concentrated bet on Dwellings, not a balanced portfolio call.</div>
+      </div>
+      <div class="finding reveal">
+        <div class="head serif">02 &middot; Untracked ad spend</div>
+        <div class="body">"DA | Sales," the single largest Meta campaign by budget, spent $12,917.08 &mdash; 34.7% of the entire $37,200.94 Meta budget &mdash; with zero recorded results. Over a third of Q4 ad spend would otherwise renew blind.</div>
+      </div>
+      <div class="finding reveal">
+        <div class="head serif">03 &middot; Channel conversion gap</div>
+        <div class="body">Organic Search converts at 0.476% versus Paid Social's 0.124% &mdash; a 3.8&times; gap on comparable pageview volume (80,596 vs. 90,978). Q4 paid budget shouldn't scale with Paid Social's traffic volume alone.</div>
+      </div>
+      <div class="finding reveal">
+        <div class="head serif">04 &middot; Retention gap</div>
+        <div class="body">Only 12 of 1,021 unique customers in the bot-filtered checkout data came back for a second cart &mdash; a 1.2% repeat rate. The biggest untapped lever in the business isn't cart abandonment; it's a retention loop that doesn't exist yet.</div>
+      </div>
+      <div class="finding reveal">
+        <div class="head serif">05 &middot; Abandonment, corrected</div>
+        <div class="body">The raw cart abandonment rate (all-time carts against one month of orders) reads as 91.9%. Filter bot carts and align the window to July 2025 and the real rate is 50.8% &mdash; inside normal e-commerce range, not a crisis that justifies a checkout rebuild.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     THE GAME PLAN
+     ============================================================ -->
+<section id="gameplan">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="index">
+        Part VI
+        <span class="roman">The Game Plan</span>
+      </div>
+      <div>
+        <div class="section-eyebrow">Recommendations to Breaking Games</div>
+        <h2 class="section-title serif">Three things to do before Q4.</h2>
+        <p class="section-caption">Each recommendation ties directly to a finding above.</p>
+      </div>
+    </div>
+
+    <div class="gameplan">
+      <div class="gp-card reveal">
+        <div class="step">Move 01</div>
+        <div class="title serif">Print the proven 13 SKUs.</div>
+        <div class="meta">
+          <div class="k">Rationale</div>
+          <div class="v">80.2% of seven-month revenue ran through 13 SKUs, 8 of them Dwellings. The catalog's long tail is a hedge, not a profit driver.</div>
+        </div>
+        <div class="meta">
+          <div class="k">Owner</div>
+          <div class="v"><strong>Mike</strong> &middot; final call on print quantities by Nov 1</div>
+        </div>
+        <div class="meta">
+          <div class="k">Impact</div>
+          <div class="v">Tighter cash position into Q4. Less long-tail inventory risk. Revenue protected on the products the data says move.</div>
+        </div>
+      </div>
+      <div class="gp-card reveal">
+        <div class="step">Move 02</div>
+        <div class="title serif">Rebalance ~$20K of Meta budget.</div>
+        <div class="meta">
+          <div class="k">Rationale</div>
+          <div class="v">"DA | Sales" ($12,917, untracked) and Advantage Plus ($6,864 at $70.76/result) together are ~$19.8K of spend that isn't earning its keep, against "DA | Sales | ATC" at $4.96/result and Organic Search converting 3.8&times; Paid Social.</div>
+        </div>
+        <div class="meta">
+          <div class="k">Owner</div>
+          <div class="v"><strong>Mike</strong> &middot; ahead of the Q4 budget review with Shari</div>
+        </div>
+        <div class="meta">
+          <div class="k">Impact</div>
+          <div class="v">Same Q4 ad budget, materially better attributed-conversion yield &mdash; and a defensible answer for Shari on whether the $37,200.94 in H1 spend worked.</div>
+        </div>
+      </div>
+      <div class="gp-card reveal">
+        <div class="step">Move 03</div>
+        <div class="title serif">Build the retention engine.</div>
+        <div class="meta">
+          <div class="k">Rationale</div>
+          <div class="v">1.2% repeat-customer rate is effectively zero, and it's the cheaper fix &mdash; the 50.8% adjusted abandonment rate says the checkout itself isn't the emergency.</div>
+        </div>
+        <div class="meta">
+          <div class="k">Owner</div>
+          <div class="v"><strong>Mike</strong> &middot; e-commerce team, with eng support to wire purchase events</div>
+        </div>
+        <div class="meta">
+          <div class="k">Impact</div>
+          <div class="v">First measurable repeat-purchase metric by end of Q1. Incremental Q4 revenue likely modest &mdash; the structural change is the win.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     Q4 ROADMAP
+     ============================================================ -->
+<section class="deep" id="roadmap">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="index">
+        Part VII
+        <span class="roman">Sequencing</span>
+      </div>
+      <div>
+        <div class="section-eyebrow">Q4 Roadmap</div>
+        <h2 class="section-title serif">When to do each thing &mdash; between now and December 31.</h2>
+        <p class="section-caption">A timeline that respects the Nov 1 print commit and gets the retention engine live before the holiday peak.</p>
+      </div>
+    </div>
+
+    <div class="roadmap">
+      <div class="roadmap-track">
+        <div class="roadmap-step">
+          <div class="dot">A</div>
+          <div class="month">August</div>
+          <div class="title serif">Audit &amp; decide</div>
+          <div class="body">Lock the 13-SKU reorder list with Mike. Audit "DA | Sales" attribution before renewal. Scope a basic post-purchase email flow.</div>
+        </div>
+        <div class="roadmap-step">
+          <div class="dot">B</div>
+          <div class="month">September</div>
+          <div class="title serif">Build &amp; test</div>
+          <div class="body">Pause or rework "DA | Sales" and Advantage Plus. Stand up the post-purchase email flow. Shift incremental budget toward what's measurable.</div>
+        </div>
+        <div class="roadmap-step">
+          <div class="dot">C</div>
+          <div class="month">October</div>
+          <div class="title serif">Run &amp; receive</div>
+          <div class="body">Print run delivered. Scale spend on proven campaigns like "DA | Sales | ATC." Retention flow now seasoned with first-month data.</div>
+        </div>
+        <div class="roadmap-step">
+          <div class="dot">D</div>
+          <div class="month">November</div>
+          <div class="title serif">Push BFCM</div>
+          <div class="body">Black Friday + Cyber Monday push on the proven 13 SKUs. First returning-customer offer goes out. Monitor abandonment against the 50.8% July baseline.</div>
+        </div>
+        <div class="roadmap-step">
+          <div class="dot">E</div>
+          <div class="month">December</div>
+          <div class="title serif">Land &amp; learn</div>
+          <div class="body">Holiday peak. Measure the repeat-rate lift for the first time. Document what worked &mdash; the Q1 review writes itself.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<footer>
+  <div class="wrap">
+    <div>Breaking Games E-Commerce Analytics &amp; Database Design Externship &middot; Prepared by Lazaro Valdez</div>
+    <div class="row">
+      <span>Data: <code>breaking_games.db</code></span>
+      <span>Dashboard tables: <code>dashboard_metrics</code>, <code>dashboard_leaderboard</code>, <code>dashboard_channels</code></span>
+      <span>Built: <code>08-30-2026</code></span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ============================================================
+// COLOR CONSTANTS (mirror CSS vars)
+// ============================================================
+const C = {
+  primary: '#B8552B',
+  primaryLight: '#DA7A4F',
+  forest: '#1F3A2B',
+  forestLight: '#2E5640',
+  gold: '#C9A24E',
+  goldLight: '#E0BE76',
+  slate: '#5A7A8A',
+  mauve: '#9A5A7A',
+  warmGray: '#D4C9B8',
+  ink: '#1A1410',
+  hairline: '#E8DFC9',
+  bg: '#F8F2E5'
+};
+
+// ============================================================
+// CHART.JS DEFAULTS
+// ============================================================
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.color = '#3A322A';
+Chart.defaults.borderColor = C.hairline;
+
+// ============================================================
+// CHART 1 — Channel CVR (horizontal bar), real 6-channel taxonomy
+// from dim_referrer (Project 3), checkout_sessions / pageviews
+// ============================================================
+new Chart(document.getElementById('cvrChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Paid Social', 'Organic Social', 'Paid Search', 'Owned', 'Other', 'Organic Search'],
+    datasets: [{
+      label: 'CVR (%)',
+      data: [0.124, 0.216, 0.231, 0.237, 0.374, 0.476],
+      backgroundColor: [C.primaryLight, C.mauve, C.slate, C.warmGray, C.gold, C.forestLight],
+      borderRadius: 6,
+      borderSkipped: false,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: C.ink,
+        titleFont: { weight: 600 },
+        bodyFont: { size: 13 },
+        padding: 12,
+        callbacks: { label: ctx => ctx.parsed.x.toFixed(3) + '% conversion rate' }
+      }
+    },
+    scales: {
+      x: {
+        beginAtZero: true,
+        ticks: { callback: v => v.toFixed(2) + '%' },
+        grid: { color: C.hairline }
+      },
+      y: { grid: { display: false } }
+    },
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: { duration: 1200, easing: 'easeOutQuart' }
+  }
+});
+
+// ============================================================
+// CHART 2 — Revenue Concentration (doughnut)
+// ============================================================
+new Chart(document.getElementById('revenueDistChart'), {
+  type: 'doughnut',
+  data: {
+    labels: [
+      'Dwellings of Eldervale ($39,813.67)',
+      'We’re Doomed! franchise ($4,743.80)',
+      'The Big Box of Magic ($1,920.14)',
+      'MIXTAPE ($1,733.39)',
+      'Rest of catalog ($12,874.33)'
+    ],
+    datasets: [{
+      data: [39813.67, 4743.80, 1920.14, 1733.39, 12874.33],
+      backgroundColor: [C.primary, C.forestLight, C.slate, C.mauve, C.warmGray],
+      borderColor: '#fff',
+      borderWidth: 3,
+      hoverOffset: 8
+    }]
+  },
+  options: {
+    plugins: {
+      legend: {
+        position: 'right',
+        labels: { boxWidth: 14, padding: 12, font: { size: 11.5 } }
+      },
+      tooltip: {
+        backgroundColor: C.ink,
+        padding: 12,
+        callbacks: {
+          label: ctx => {
+            const total = ctx.dataset.data.reduce((a,b)=>a+b, 0);
+            const pct = (ctx.parsed / total * 100).toFixed(1);
+            return ctx.label + ' — ' + pct + '%';
+          }
+        }
+      }
+    },
+    cutout: '60%',
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: { animateRotate: true, duration: 1400, easing: 'easeOutQuart' }
+  }
+});
+
+// ============================================================
+// CHART 3 — Hour of Day, distinct carts by hour (clean_checkouts)
+// ============================================================
+new Chart(document.getElementById('hourChart'), {
+  type: 'bar',
+  data: {
+    labels: ['12a','','2','','4','','6','','8','','10','','12p','','2','','4','','6','','8','','10',''],
+    datasets: [{
+      label: 'Carts',
+      data: [33,16,15,31,30,27,27,33,39,38,60,57,77,77,40,44,51,46,47,59,45,45,54,43],
+      backgroundColor: ctx => {
+        const v = ctx.parsed?.y || 0;
+        if (v >= 70) return C.primary;
+        if (v >= 50) return C.primaryLight;
+        if (v >= 35) return C.gold;
+        return C.warmGray;
+      },
+      borderRadius: 3,
+      borderSkipped: false
+    }]
+  },
+  options: {
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: C.ink,
+        padding: 10,
+        callbacks: {
+          title: (items) => {
+            const labels = ['12am','1am','2am','3am','4am','5am','6am','7am','8am','9am','10am','11am','12pm','1pm','2pm','3pm','4pm','5pm','6pm','7pm','8pm','9pm','10pm','11pm'];
+            return labels[items[0].dataIndex];
+          },
+          label: ctx => ctx.parsed.y + ' carts'
+        }
+      }
+    },
+    scales: {
+      y: { beginAtZero: true, grid: { color: C.hairline } },
+      x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+    },
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: { duration: 1000, delay: ctx => ctx.dataIndex * 25 }
+  }
+});
+
+// ============================================================
+// CHART 4 — Geographic distribution (US states, horizontal bar)
+// ============================================================
+new Chart(document.getElementById('geoChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Washington', 'California', 'Texas', 'New York', 'Georgia', 'Florida', 'Pennsylvania', 'Ohio', 'Massachusetts', 'Wisconsin'],
+    datasets: [{
+      label: 'Carts',
+      data: [79, 44, 27, 25, 22, 20, 19, 18, 18, 17],
+      backgroundColor: ctx => {
+        const v = ctx.parsed?.x || 0;
+        if (v >= 60) return C.primary;
+        if (v >= 30) return C.primaryLight;
+        return C.warmGray;
+      },
+      borderRadius: 4,
+      borderSkipped: false
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: C.ink,
+        padding: 10,
+        callbacks: { label: ctx => ctx.parsed.x + ' carts' }
+      }
+    },
+    scales: {
+      x: { beginAtZero: true, grid: { color: C.hairline } },
+      y: { grid: { display: false } }
+    },
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: { duration: 1100, delay: ctx => ctx.dataIndex * 35, easing: 'easeOutQuart' }
+  }
+});
+
+// ============================================================
+// CHART 5 — Meta Spend vs Results (dual-axis), top 7 by spend
+// ============================================================
+new Chart(document.getElementById('adSpendChart'), {
+  type: 'bar',
+  data: {
+    labels: [
+      'DA | Sales',
+      '*DA | Traffic TOF',
+      '*DA | Sales | Advantage Plus',
+      'DA | MAT | Dwellings',
+      'DA | Reach | Retargeting',
+      'DA | Sales | ATC',
+      'DA | MAT | We’re Doomed'
+    ],
+    datasets: [
+      {
+        label: 'Spend ($)',
+        data: [12917, 8635, 6864, 4345, 1612, 1442, 1386],
+        backgroundColor: C.primary,
+        borderRadius: 4,
+        borderSkipped: false,
+        yAxisID: 'ySpend',
+        order: 2,
+      },
+      {
+        label: 'Tracked results (sales-objective only)',
+        data: [0, null, 97, null, null, 291, null],
+        backgroundColor: C.forestLight,
+        borderRadius: 4,
+        borderSkipped: false,
+        yAxisID: 'yResults',
+        order: 1,
+      }
+    ]
+  },
+  options: {
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 14, font: { size: 12 } } },
+      tooltip: {
+        backgroundColor: C.ink,
+        padding: 12,
+        callbacks: {
+          label: ctx => {
+            if (ctx.dataset.label === 'Spend ($)') return 'Spend: $' + ctx.parsed.y.toLocaleString();
+            if (ctx.parsed.y === null) return 'Different objective (LPVs / reach)';
+            return 'Results: ' + ctx.parsed.y.toLocaleString();
+          }
+        }
+      }
+    },
+    scales: {
+      ySpend: {
+        type: 'linear', position: 'left', beginAtZero: true,
+        ticks: { callback: v => '$' + (v/1000) + 'k' },
+        title: { display: true, text: 'Spend ($)' },
+        grid: { color: C.hairline }
+      },
+      yResults: {
+        type: 'linear', position: 'right', beginAtZero: true,
+        grid: { drawOnChartArea: false },
+        title: { display: true, text: 'Tracked results' }
+      },
+      x: { ticks: { font: { size: 10.5 }, maxRotation: 30, minRotation: 15 }, grid: { display: false } }
+    },
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: { duration: 1200, easing: 'easeOutQuart' }
+  }
+});
+
+// ============================================================
+// ANIMATED NUMBER COUNTERS
+// ============================================================
+function animateCounter(el) {
+  const target = parseInt(el.dataset.target, 10);
+  const prefix = el.dataset.prefix || '';
+  const duration = 1400;
+  const start = performance.now();
+  function step(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - t, 3);
+    const val = Math.floor(target * eased);
+    el.textContent = prefix + val.toLocaleString();
+    if (t < 1) requestAnimationFrame(step);
+    else el.textContent = prefix + target.toLocaleString();
+  }
+  requestAnimationFrame(step);
+}
+
+// ============================================================
+// SCROLL-TRIGGERED REVEAL + COUNTER START
+// ============================================================
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('in');
+      entry.target.querySelectorAll('.kpi .value[data-target]').forEach(animateCounter);
+      io.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+window.addEventListener('load', () => {
+  const kpis = document.querySelectorAll('.kpi .value[data-target]');
+  const rect = kpis[0]?.getBoundingClientRect();
+  if (rect && rect.top < window.innerHeight) {
+    kpis.forEach(animateCounter);
+  }
+});
+</script>
+
+</body>
+</html>
